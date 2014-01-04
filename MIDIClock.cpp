@@ -2,13 +2,13 @@
 #include "MIDIClock.h"
 #include "TimingClockTask.h"
 
-MIDIClock::MIDIClock() : Scheduler(32) {
+MIDIClock::MIDIClock() {
 	this->bpm = 120;
 	this->init();
 }
 
 
-MIDIClock::MIDIClock(byte bpm) : Scheduler(32) {
+MIDIClock::MIDIClock(byte bpm) {
 	this->bpm = bpm;
 	this->init();
 }
@@ -18,26 +18,33 @@ void MIDIClock::init() {
 	unsigned long now = millis() + 500;
 
 	for(int i = 0; i < 6; i++) {
-		TimingClockTask * task = new TimingClockTask(now + (i * this->getIntervalMillis()));
-		this->scheduleTask(task);
+		this->lastExecutionTime = now + (i * this->getIntervalMillis());
+		TimingClockTask * task = new TimingClockTask(this->lastExecutionTime);
+		this->scheduler.scheduleTask(task);
 	}
 }
 
 
 unsigned long MIDIClock::getIntervalMillis() {
-	return 60000 / this->bpm / 6;
+	return (60000 / this->bpm) / 6;
 }
 
 
 unsigned long MIDIClock::getIntervalMicros() {
-	return 60000000 / this->bpm / 6;
+	return (60000000 / this->bpm) / 6;
 }
 
 
 void MIDIClock::executeTimingClockTask() {
-	this->executeTask();
+	this->scheduler.executeTask();
 
-	if(this->queue->getSize() < 6) {
-		
+	if(this->scheduler.getNumTasksScheduled() < 6) {
+		this->lastExecutionTime += this->getIntervalMillis();
+		TimingClockTask * task = new TimingClockTask(this->lastExecutionTime);
+		this->scheduler.scheduleTask(task);
 	}
+}
+
+unsigned long MIDIClock::getLastExecutionTime() {
+	return this->lastExecutionTime;
 }

@@ -4,18 +4,24 @@
 #include "Arduino.h"
 #include "MIDIClock.h"
 #include <AbstractTask.h>
+#include <MIDI.h>
 #include <TimingClockMessage.h>
 
 class TimingClockTask : public AbstractTask {
 	private:
-		MIDIClock * clock;
+		TimingClockMessage msg;
+		MIDI & midi = MIDI::getInstance();
 	public:
-		TimingClockTask(unsigned long executionTime, MIDIClock * clock) : AbstractTask(executionTime) {
-			this->clock = clock;
+		TimingClockTask(unsigned long executionTime) : AbstractTask(executionTime) {
 		}
 
-		void execute() {
 
+		virtual ~TimingClockTask() {
+		}
+
+
+		void execute() {
+			this->midi.send(msg.getStatus());
 		}
 };
 

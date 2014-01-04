@@ -5,9 +5,11 @@
 #include <Scheduler.h>
 #include <TimingClockMessage.h>
 
-class MIDIClock : public Scheduler {
+class MIDIClock {
 	private:
 		byte bpm;
+		unsigned long lastExecutionTime;
+		Scheduler scheduler;
 		TimingClockMessage message;
 
 	public:
@@ -21,6 +23,7 @@ class MIDIClock : public Scheduler {
 
 	public:
 		void executeTimingClockTask();
+		unsigned long getLastExecutionTime();
 };
 
 #endif
