@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "MIDIClock.h"
 #include "TimingClockTask.h"
+#include <LedOffTask.h>
 
 MIDIClock::MIDIClock() {
 	this->bpm = 120;
@@ -18,7 +19,7 @@ void MIDIClock::init() {
 	unsigned long now = millis() + 500;
 
 	for(int i = 0; i < 6; i++) {
-		this->lastExecutionTime = now + (i * this->getIntervalMillis());
+		this->lastExecutionTime = now + (i * this->getIntervalMicros());
 		TimingClockTask * task = new TimingClockTask(this->lastExecutionTime);
 		this->scheduler.scheduleTask(task);
 	}
@@ -36,10 +37,17 @@ unsigned long MIDIClock::getIntervalMicros() {
 
 
 void MIDIClock::executeTimingClockTask() {
-	this->scheduler.executeTask();
+	if(this->scheduler.executeTask()) {
+		this->count++;
+		if(this->count == 6) {
+			this->count = 0;
+			digitalWrite(13, HIGH);
+		}
+		else if(this->count == 1) digitalWrite(13, LOW);
+	}
 
 	if(this->scheduler.getNumTasksScheduled() < 6) {
-		this->lastExecutionTime += this->getIntervalMillis();
+		this->lastExecutionTime += this->getIntervalMicros();
 		TimingClockTask * task = new TimingClockTask(this->lastExecutionTime);
 		this->scheduler.scheduleTask(task);
 	}

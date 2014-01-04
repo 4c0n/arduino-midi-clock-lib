@@ -11,6 +11,7 @@ class MIDIClock {
 		unsigned long lastExecutionTime;
 		Scheduler scheduler;
 		TimingClockMessage message;
+		byte count = 0;
 
 	public:
 		MIDIClock();
